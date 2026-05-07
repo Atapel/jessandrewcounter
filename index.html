@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Days Since Andrew &amp; jessunchik Had Good Vibes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Oswald:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sign-yellow: #ffd400;
+    --sign-yellow-dark: #e8b800;
+    --sign-black: #111;
+    --sign-red: #c8221d;
+    --board-bg: #0c0c0c;
+    --digit-bg: #1a1a1a;
+    --digit-shine: #2a2a2a;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    font-family: 'Oswald', sans-serif;
+    background:
+      radial-gradient(circle at 50% 0%, #2a2a2a 0%, #111 60%, #050505 100%);
+    color: #fff;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        rgba(255,255,255,0.02) 0px,
+        rgba(255,255,255,0.02) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .frame {
+    position: relative;
+    z-index: 1;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    text-align: center;
+  }
+
+  .sign {
+    background: var(--sign-yellow);
+    color: var(--sign-black);
+    border: 10px solid var(--sign-black);
+    border-radius: 12px;
+    padding: 28px 24px 32px;
+    box-shadow:
+      0 0 0 6px var(--sign-yellow-dark),
+      0 30px 60px rgba(0,0,0,0.6),
+      inset 0 0 0 4px var(--sign-yellow-dark);
+    position: relative;
+  }
+
+  .sign::before, .sign::after {
+    content: "";
+    position: absolute;
+    width: 18px; height: 18px;
+    background: #444;
+    border: 3px solid #222;
+    border-radius: 50%;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.6);
+  }
+  .sign::before { top: 10px; left: 10px; }
+  .sign::after  { top: 10px; right: 10px; }
+
+  .corner {
+    position: absolute;
+    width: 18px; height: 18px;
+    background: #444;
+    border: 3px solid #222;
+    border-radius: 50%;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.6);
+  }
+  .corner.bl { bottom: 10px; left: 10px; }
+  .corner.br { bottom: 10px; right: 10px; }
+
+  .stripes {
+    height: 18px;
+    background: repeating-linear-gradient(
+      45deg,
+      var(--sign-black) 0 18px,
+      var(--sign-yellow) 18px 36px
+    );
+    border-radius: 4px;
+    margin: 0 auto 18px;
+    max-width: 92%;
+  }
+
+  .eyebrow {
+    font-family: 'Bungee', sans-serif;
+    font-size: clamp(14px, 2.4vw, 22px);
+    letter-spacing: 0.08em;
+    margin: 0;
+  }
+
+  .title {
+    font-family: 'Bungee', sans-serif;
+    font-size: clamp(28px, 5.5vw, 56px);
+    line-height: 1.05;
+    margin: 6px 0 4px;
+    text-transform: uppercase;
+  }
+
+  .subtitle {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: clamp(14px, 2.2vw, 20px);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 0 0 22px;
+    opacity: 0.85;
+  }
+
+  .board {
+    background: var(--board-bg);
+    border-radius: 14px;
+    padding: 22px 18px;
+    margin: 14px auto 18px;
+    max-width: 720px;
+    box-shadow:
+      inset 0 4px 16px rgba(0,0,0,0.85),
+      inset 0 -2px 6px rgba(255,255,255,0.06);
+    border: 4px solid #000;
+  }
+
+  .digits {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: nowrap;
+  }
+
+  .digit {
+    position: relative;
+    width: clamp(60px, 14vw, 130px);
+    height: clamp(90px, 20vw, 180px);
+    background: linear-gradient(
+      to bottom,
+      var(--digit-shine) 0%,
+      var(--digit-bg) 48%,
+      #000 50%,
+      var(--digit-bg) 52%,
+      var(--digit-shine) 100%
+    );
+    border-radius: 10px;
+    box-shadow:
+      0 0 0 3px #000,
+      inset 0 0 12px rgba(0,0,0,0.9);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(60px, 14vw, 130px);
+    font-weight: 700;
+    color: var(--sign-yellow);
+    text-shadow:
+      0 0 8px rgba(255, 212, 0, 0.55),
+      0 0 18px rgba(255, 212, 0, 0.25);
+    line-height: 1;
+  }
+
+  .digit::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    top: 50%;
+    height: 2px;
+    background: rgba(0,0,0,0.85);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  .digit.flip .num {
+    animation: flip 0.55s ease-in-out;
+  }
+
+  @keyframes flip {
+    0%   { transform: rotateX(0deg);  opacity: 1; }
+    49%  { transform: rotateX(-90deg); opacity: 0.2; }
+    51%  { transform: rotateX(90deg);  opacity: 0.2; }
+    100% { transform: rotateX(0deg);  opacity: 1; }
+  }
+
+  .label {
+    font-family: 'Bungee', sans-serif;
+    font-size: clamp(18px, 3.4vw, 30px);
+    margin: 8px 0 0;
+    letter-spacing: 0.06em;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px 26px;
+    margin-top: 18px;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: clamp(12px, 1.7vw, 16px);
+  }
+
+  .meta div span {
+    display: block;
+    font-weight: 400;
+    opacity: 0.75;
+    letter-spacing: 0.04em;
+    font-size: 0.78em;
+  }
+
+  .record {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 10px;
+    color: var(--sign-black);
+    background: #fff;
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 4px;
+    border: 2px solid #000;
+    font-size: clamp(12px, 1.8vw, 16px);
+  }
+
+  .signed {
+    margin-top: 18px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    opacity: 0.7;
+  }
+
+  .controls {
+    margin-top: 32px;
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    font-family: 'Bungee', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 14px 22px;
+    border-radius: 8px;
+    border: 3px solid #000;
+    cursor: pointer;
+    background: var(--sign-red);
+    color: #fff;
+    box-shadow: 0 6px 0 #7a1411, 0 8px 14px rgba(0,0,0,0.4);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+
+  button:hover { transform: translateY(2px); box-shadow: 0 4px 0 #7a1411, 0 6px 10px rgba(0,0,0,0.4); }
+  button:active { transform: translateY(6px); box-shadow: 0 0 0 #7a1411, 0 2px 6px rgba(0,0,0,0.4); }
+
+  button.ghost {
+    background: #222;
+    color: var(--sign-yellow);
+    box-shadow: 0 6px 0 #000, 0 8px 14px rgba(0,0,0,0.4);
+  }
+  button.ghost:hover { box-shadow: 0 4px 0 #000, 0 6px 10px rgba(0,0,0,0.4); }
+  button.ghost:active { box-shadow: 0 0 0 #000, 0 2px 6px rgba(0,0,0,0.4); }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%) translateY(120%);
+    background: #111;
+    color: var(--sign-yellow);
+    border: 2px solid var(--sign-yellow);
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    transition: transform 0.4s ease;
+    z-index: 50;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .footer-tape {
+    margin-top: 36px;
+    height: 22px;
+    background: repeating-linear-gradient(
+      45deg,
+      #000 0 22px,
+      var(--sign-yellow) 22px 44px
+    );
+    border-radius: 4px;
+  }
+
+  .fineprint {
+    margin-top: 18px;
+    font-family: 'Share Tech Mono', monospace;
+    color: #aaa;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .heart {
+    color: var(--sign-red);
+  }
+
+  /* Modal */
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: var(--sign-yellow);
+    color: #000;
+    border: 6px solid #000;
+    border-radius: 10px;
+    padding: 24px;
+    max-width: 420px;
+    width: 90%;
+    text-align: left;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+  }
+  .modal h3 {
+    font-family: 'Bungee', sans-serif;
+    margin: 0 0 8px;
+    font-size: 22px;
+    text-transform: uppercase;
+  }
+  .modal p {
+    margin: 0 0 12px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 15px;
+  }
+  .modal input {
+    width: 100%;
+    padding: 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 16px;
+    border: 3px solid #000;
+    border-radius: 6px;
+    background: #fff;
+    color: #000;
+    margin-bottom: 12px;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  .modal button {
+    font-size: 14px;
+    padding: 10px 14px;
+  }
+
+  @media (max-width: 520px) {
+    .digits { gap: 6px; }
+    .meta { gap: 10px 16px; }
+  }
+</style>
+</head>
+<body>
+  <main class="frame">
+    <section class="sign" aria-label="Good Vibes Counter">
+      <span class="corner bl"></span>
+      <span class="corner br"></span>
+
+      <div class="stripes" aria-hidden="true"></div>
+
+      <p class="eyebrow">⚠ Notice ⚠</p>
+      <h1 class="title">This Relationship Has Operated</h1>
+
+      <div class="board" role="status" aria-live="polite">
+        <div class="digits" id="digits">
+          <div class="digit"><span class="num">0</span></div>
+          <div class="digit"><span class="num">0</span></div>
+          <div class="digit"><span class="num">0</span></div>
+        </div>
+      </div>
+
+      <p class="label">Days Since Andrew &amp; Jessunchik Had Good Vibes</p>
+
+      <div class="meta">
+        <div>Last Incident<span id="lastIncident">—</span></div>
+        <div>Current Streak<span id="streak">—</span></div>
+        <div>All-Time Record<span id="record">—</span></div>
+      </div>
+
+      <div class="signed">— Posted by Management <span class="heart">♥</span></div>
+
+      <div class="stripes" aria-hidden="true" style="margin-top:22px;"></div>
+    </section>
+
+    <div class="controls">
+      <button id="resetBtn" type="button">🚨 Report New Incident</button>
+      <button id="aboutBtn" class="ghost" type="button">ℹ About This Sign</button>
+    </div>
+
+    <div class="footer-tape" aria-hidden="true"></div>
+
+    <p class="fineprint">
+      No Andrews or Jessunchiks were harmed in the making of this sign.<br/>
+      In case of emergency: communicate, snack, regroup. <span class="heart">♥</span>
+    </p>
+  </main>
+
+  <div class="modal-bg" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetTitle">
+    <div class="modal">
+      <h3 id="resetTitle">Reset The Counter?</h3>
+      <p>An incident has occurred. Enter the management password to reset the counter to zero days.</p>
+      <input id="resetPwd" type="password" placeholder="Password" autocomplete="off" />
+      <div class="modal-actions">
+        <button class="ghost" type="button" id="cancelReset">Cancel</button>
+        <button type="button" id="confirmReset">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="aboutModal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+    <div class="modal">
+      <h3 id="aboutTitle">About This Sign</h3>
+      <p>
+        Inspired by the classic <em>"This facility has operated XXX days without an accident"</em>
+        signs you see in factory break rooms.
+      </p>
+      <p>
+        An "incident" here means: a serious deep convo, a fight, or anything else
+        that breaks the good-vibes streak. Everything else? Vibes intact. ♥
+      </p>
+      <p style="font-family:'Share Tech Mono', monospace; font-size:13px;">
+        Last incident: Monday, May 4, 2026.
+      </p>
+      <div class="modal-actions">
+        <button type="button" id="closeAbout">Got It</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const RESET_PASSWORD = "itcouldonlybethis";
+  const DEFAULT_LAST_INCIDENT = "2026-05-04"; // Monday 5/4
+  const STORAGE_KEY = "gv-last-incident";
+  const RECORD_KEY  = "gv-record-days";
+
+  const digitsEl = document.getElementById("digits");
+  const lastIncidentEl = document.getElementById("lastIncident");
+  const streakEl = document.getElementById("streak");
+  const recordEl = document.getElementById("record");
+  const toastEl = document.getElementById("toast");
+
+  const resetBtn = document.getElementById("resetBtn");
+  const aboutBtn = document.getElementById("aboutBtn");
+  const resetModal = document.getElementById("resetModal");
+  const aboutModal = document.getElementById("aboutModal");
+  const cancelReset = document.getElementById("cancelReset");
+  const confirmReset = document.getElementById("confirmReset");
+  const closeAbout = document.getElementById("closeAbout");
+  const resetPwd = document.getElementById("resetPwd");
+
+  function getLastIncident() {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored || DEFAULT_LAST_INCIDENT;
+  }
+
+  function setLastIncident(iso) {
+    localStorage.setItem(STORAGE_KEY, iso);
+  }
+
+  function getRecord() {
+    const r = parseInt(localStorage.getItem(RECORD_KEY) || "0", 10);
+    return isNaN(r) ? 0 : r;
+  }
+
+  function setRecord(n) {
+    localStorage.setItem(RECORD_KEY, String(n));
+  }
+
+  function startOfDay(d) {
+    const x = new Date(d);
+    x.setHours(0, 0, 0, 0);
+    return x;
+  }
+
+  function daysBetween(a, b) {
+    const ms = startOfDay(b) - startOfDay(a);
+    return Math.max(0, Math.floor(ms / 86400000));
+  }
+
+  function formatDate(iso) {
+    const [y, m, d] = iso.split("-").map(Number);
+    const dt = new Date(y, m - 1, d);
+    return dt.toLocaleDateString(undefined, {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    });
+  }
+
+  let currentDigits = ["0","0","0"];
+
+  function renderDigits(n) {
+    const padded = String(Math.min(n, 999)).padStart(3, "0").split("");
+    const nodes = digitsEl.querySelectorAll(".digit");
+    nodes.forEach((node, i) => {
+      const numEl = node.querySelector(".num");
+      if (currentDigits[i] !== padded[i]) {
+        node.classList.remove("flip");
+        // force reflow to restart animation
+        void node.offsetWidth;
+        node.classList.add("flip");
+        setTimeout(() => { numEl.textContent = padded[i]; }, 270);
+      } else {
+        numEl.textContent = padded[i];
+      }
+    });
+    currentDigits = padded;
+  }
+
+  function update() {
+    const lastIso = getLastIncident();
+    const [y, m, d] = lastIso.split("-").map(Number);
+    const lastDate = new Date(y, m - 1, d);
+    const today = new Date();
+    const days = daysBetween(lastDate, today);
+
+    let record = getRecord();
+    if (days > record) {
+      record = days;
+      setRecord(record);
+    }
+
+    renderDigits(days);
+    lastIncidentEl.textContent = formatDate(lastIso);
+    streakEl.textContent = days === 1 ? "1 day" : days + " days";
+    recordEl.textContent = record === 1 ? "1 day" : record + " days";
+  }
+
+  function todayIso() {
+    const t = new Date();
+    const y = t.getFullYear();
+    const m = String(t.getMonth() + 1).padStart(2, "0");
+    const d = String(t.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toastEl.classList.remove("show"), 2400);
+  }
+
+  function openModal(m) {
+    m.classList.add("show");
+    if (m === resetModal) {
+      resetPwd.value = "";
+      setTimeout(() => resetPwd.focus(), 50);
+    }
+  }
+  function closeModal(m) { m.classList.remove("show"); }
+
+  resetBtn.addEventListener("click", () => openModal(resetModal));
+  aboutBtn.addEventListener("click", () => openModal(aboutModal));
+  cancelReset.addEventListener("click", () => closeModal(resetModal));
+  closeAbout.addEventListener("click", () => closeModal(aboutModal));
+
+  [resetModal, aboutModal].forEach(m => {
+    m.addEventListener("click", (e) => {
+      if (e.target === m) closeModal(m);
+    });
+  });
+
+  function tryReset() {
+    if (resetPwd.value === RESET_PASSWORD) {
+      setLastIncident(todayIso());
+      closeModal(resetModal);
+      update();
+      showToast("Incident logged. Counter reset to 0. 🚨");
+    } else {
+      showToast("Wrong password. Vibes still intact. 🙃");
+      resetPwd.select();
+    }
+  }
+
+  confirmReset.addEventListener("click", tryReset);
+  resetPwd.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") tryReset();
+    if (e.key === "Escape") closeModal(resetModal);
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeModal(resetModal);
+      closeModal(aboutModal);
+    }
+  });
+
+  update();
+  // Tick over at midnight in case the page is left open.
+  setInterval(update, 60 * 1000);
+})();
+</script>
+</body>
+</html>
