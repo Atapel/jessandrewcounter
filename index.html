@@ -199,6 +199,84 @@
     100% { transform: rotateX(0deg);  opacity: 1; }
   }
 
+  .clock-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+  }
+
+  .clock-digit {
+    width: clamp(28px, 6vw, 52px);
+    height: clamp(42px, 9vw, 76px);
+    background: linear-gradient(
+      to bottom,
+      var(--digit-shine) 0%,
+      var(--digit-bg) 48%,
+      #000 50%,
+      var(--digit-bg) 52%,
+      var(--digit-shine) 100%
+    );
+    border-radius: 6px;
+    box-shadow: 0 0 0 2px #000, inset 0 0 6px rgba(0,0,0,0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(26px, 5.5vw, 50px);
+    font-weight: 700;
+    color: var(--sign-yellow);
+    text-shadow:
+      0 0 6px rgba(255, 212, 0, 0.55),
+      0 0 14px rgba(255, 212, 0, 0.25);
+    line-height: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .clock-digit::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: 50%;
+    height: 1px;
+    background: rgba(0,0,0,0.85);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  .clock-sep {
+    color: var(--sign-yellow);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(26px, 5.5vw, 50px);
+    font-weight: 700;
+    text-shadow: 0 0 6px rgba(255, 212, 0, 0.55);
+    animation: blink 1s steps(2, start) infinite;
+    padding: 0 2px;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0.25; }
+  }
+
+  .unit-row {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: clamp(8px, 2vw, 18px);
+    margin-top: 6px;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: clamp(10px, 1.6vw, 13px);
+    color: var(--sign-yellow);
+    opacity: 0.75;
+  }
+  .unit-row span {
+    width: clamp(62px, 13vw, 110px);
+    text-align: center;
+  }
+
   .label {
     font-family: 'Bungee', sans-serif;
     font-size: clamp(18px, 3.4vw, 30px);
@@ -400,6 +478,23 @@
           <div class="digit"><span class="num">0</span></div>
           <div class="digit"><span class="num">0</span></div>
         </div>
+
+        <div class="clock-row" id="clock" aria-label="Live time since last incident">
+          <div class="clock-digit"><span class="num">0</span></div>
+          <div class="clock-digit"><span class="num">0</span></div>
+          <span class="clock-sep">:</span>
+          <div class="clock-digit"><span class="num">0</span></div>
+          <div class="clock-digit"><span class="num">0</span></div>
+          <span class="clock-sep">:</span>
+          <div class="clock-digit"><span class="num">0</span></div>
+          <div class="clock-digit"><span class="num">0</span></div>
+        </div>
+
+        <div class="unit-row" aria-hidden="true">
+          <span>Hours</span>
+          <span>Minutes</span>
+          <span>Seconds</span>
+        </div>
       </div>
 
       <p class="label">Days Since Andrew &amp; Jessunchik Had Good Vibes</p>
@@ -493,6 +588,25 @@
     localStorage.setItem(STORAGE_KEY, iso);
   }
 
+  // Parse stored value, which may be either YYYY-MM-DD (legacy / default)
+  // or a full ISO datetime (after a reset).
+  function parseIncident(stored) {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(stored)) {
+      const [y, m, d] = stored.split("-").map(Number);
+      return new Date(y, m - 1, d, 0, 0, 0, 0);
+    }
+    const dt = new Date(stored);
+    return isNaN(dt.getTime()) ? new Date() : dt;
+  }
+
+  function incidentDateOnlyIso(stored) {
+    const dt = parseIncident(stored);
+    const y = dt.getFullYear();
+    const m = String(dt.getMonth() + 1).padStart(2, "0");
+    const d = String(dt.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
   function getRecord() {
     const r = parseInt(localStorage.getItem(RECORD_KEY) || "0", 10);
     return isNaN(r) ? 0 : r;
@@ -544,12 +658,28 @@
     currentDigits = padded;
   }
 
+  const clockNums = document.querySelectorAll("#clock .clock-digit .num");
+
+  function renderClock(h, m, s) {
+    const vals = [
+      String(Math.floor(h / 10)),
+      String(h % 10),
+      String(Math.floor(m / 10)),
+      String(m % 10),
+      String(Math.floor(s / 10)),
+      String(s % 10),
+    ];
+    clockNums.forEach((el, i) => {
+      if (el.textContent !== vals[i]) el.textContent = vals[i];
+    });
+  }
+
   function update() {
-    const lastIso = getLastIncident();
-    const [y, m, d] = lastIso.split("-").map(Number);
-    const lastDate = new Date(y, m - 1, d);
-    const today = new Date();
-    const days = daysBetween(lastDate, today);
+    const stored = getLastIncident();
+    const lastDate = parseIncident(stored);
+    const now = new Date();
+    const totalSec = Math.max(0, Math.floor((now - lastDate) / 1000));
+    const days = Math.floor(totalSec / 86400);
 
     let record = getRecord();
     if (days > record) {
@@ -558,17 +688,25 @@
     }
 
     renderDigits(days);
-    lastIncidentEl.textContent = formatDate(lastIso);
+    lastIncidentEl.textContent = formatDate(incidentDateOnlyIso(stored));
     streakEl.textContent = days === 1 ? "1 day" : days + " days";
     recordEl.textContent = record === 1 ? "1 day" : record + " days";
   }
 
-  function todayIso() {
-    const t = new Date();
-    const y = t.getFullYear();
-    const m = String(t.getMonth() + 1).padStart(2, "0");
-    const d = String(t.getDate()).padStart(2, "0");
-    return `${y}-${m}-${d}`;
+  function tickClock() {
+    const stored = getLastIncident();
+    const lastDate = parseIncident(stored);
+    const now = new Date();
+    let diff = Math.max(0, Math.floor((now - lastDate) / 1000));
+    diff = diff % 86400; // remainder after whole days
+    const h = Math.floor(diff / 3600);
+    const mm = Math.floor((diff % 3600) / 60);
+    const ss = diff % 60;
+    renderClock(h, mm, ss);
+  }
+
+  function nowIso() {
+    return new Date().toISOString();
   }
 
   function showToast(msg) {
@@ -600,9 +738,10 @@
 
   function tryReset() {
     if (resetPwd.value === RESET_PASSWORD) {
-      setLastIncident(todayIso());
+      setLastIncident(nowIso());
       closeModal(resetModal);
       update();
+      tickClock();
       showToast("Incident logged. Counter reset to 0. 🚨");
     } else {
       showToast("Wrong password. Vibes still intact. 🙃");
@@ -624,7 +763,9 @@
   });
 
   update();
-  // Tick over at midnight in case the page is left open.
+  tickClock();
+  // Live clock every second; full update (days/record) every minute.
+  setInterval(tickClock, 1000);
   setInterval(update, 60 * 1000);
 })();
 </script>
